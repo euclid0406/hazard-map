@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazard Map - Caniogan, Morong, Rizal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: #333;
+        }
+
+        nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #2563eb;
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #2563eb;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+            url('background-map.jpg');
+                background-size: cover;
+                background-position: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero .location {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .map-section {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .hazard-list {
+            list-style: none;
+        }
+
+        .hazard-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hazard-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .hazard-item.active {
+            background: #e0f2fe;
+        }
+
+        .hazard-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .hazard-count {
+            background: #e2e8f0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+        }
+
+        .map-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .map-header h2 {
+            color: #1e293b;
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            padding: 0.5rem 1rem;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .map-viewer {
+            position: relative;
+            background: #f8fafc;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+        }
+
+        .map-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: none;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+        }
+
+        .zoom-btn:hover {
+            background: #2563eb;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 300px;
+        }
+
+        .info-panel h4 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-panel p {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin: 0.25rem 0;
+        }
+
+        .risk-level {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .legend {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        .legend h4 {
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 968px) {
+            .map-section {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                top: 0;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero .location {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <div class="logo-icon">📍</div>
+            <span>HazardMap</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">Home</a></li>
+            <li><a href="#map">Hazard Map</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#methodology">Methodology</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <h1>Hazard Mapping for</h1>
+        <div class="location">Caniogan, Morong</div>
+        <p>Comprehensive disaster risk assessment and hazard identification system for sustainable community development and safety planning.</p>
+        <div class="hero-buttons">
+            <a href="#map" class="btn btn-primary">📊 View Hazard Map</a>
+            <a href="#about" class="btn btn-secondary">ℹ️ Learn More</a>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="map-section" id="map">
+            <aside class="sidebar">
+                <h3>Hazard Types</h3>
+                <ul class="hazard-list">
+                    <li class="hazard-item active" onclick="selectHazard(this, 'all')">
+                        <div style="display: flex; align-items: center;">
+                            <span class="hazard-indicator" style="background: #64748b;"></span>
+                            <span>All Hazards</span>
+                        </div>
+                        <span class="hazard-count">45</span>
+                    </li>
+                    <li class="hazard-item" onclick="selectHazard(this, 'flood')">
+                        <div style="display: flex; align-items: center;">
+                            <span class="hazard-indicator" style="background: #3b82f6;"></span>
+                            <span>Flood Risk</span>
+                        </div>
+                        <span class="hazard-count">12</span>
+                    </li>
+                    <li class="hazard-item" onclick="selectHazard(this, 'landslide')">
+                        <div style="display: flex; align-items: center;">
+                            <span class="hazard-indicator" style="background: #f97316;"></span>
+                            <span>Landslide</span>
+                        </div>
+                        <span class="hazard-count">8</span>
+                    </li>
+                    <li class="hazard-item" onclick="selectHazard(this, 'earthquake')">
+                        <div style="display: flex; align-items: center;">
+                            <span class="hazard-indicator" style="background: #ef4444;"></span>
+                            <span>Earthquake</span>
+                        </div>
+                        <span class="hazard-count">15</span>
+                    </li>
+                    <li class="hazard-item" onclick="selectHazard(this, 'storm')">
+                        <div style="display: flex; align-items: center;">
+                            <span class="hazard-indicator" style="background: #8b5cf6;"></span>
+                            <span>Storm Surge</span>
+                        </div>
+                        <span class="hazard-count">6</span>
+                    </li>
+                    <li class="hazard-item" onclick="selectHazard(this, 'drought')">
+                        <div style="display: flex; align-items: center;">
+                            <span class="hazard-indicator" style="background: #eab308;"></span>
+                            <span>Drought</span>
+                        </div>
+                        <span class="hazard-count">4</span>
+                    </li>
+                </ul>
+
+                <div class="legend">
+                    <h4>Map Legend</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fef3c7;"></div>
+                            <span>Medium Risk</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fee2e2;"></div>
+                            <span>High Risk</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #3b82f6;"></div>
+                            <span>Water Bodies</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #22c55e;"></div>
+                            <span>Vegetation</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="map-container">
+                <div class="map-header">
+                    <h2>Interactive Hazard Map</h2>
+                    <div class="map-controls">
+                        <button class="control-btn" onclick="downloadMap()">📥 Export</button>
+                        <button class="control-btn" onclick="shareMap()">🔗 Share</button>
+                    </div>
+                </div>
+
+                <div class="map-viewer" id="mapViewer">
+                    <img src="hazard-map.jpg" alt="Hazard Map of Caniogan, Morong, Rizal" class="map-image" id="mapImage">
+                    
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomIn()">+</button>
+                        <button class="zoom-btn" onclick="resetZoom()">⟲</button>
+                        <button class="zoom-btn" onclick="zoomOut()">−</button>
+                    </div>
+
+                    <div class="info-panel">
+                        <h4>Sitio Caniogan</h4>
+                        <p><strong>Risk Level:</strong> <span class="risk-level risk-medium">Medium</span></p>
+                        <p><strong>Primary Hazards:</strong> Flood, Landslide</p>
+                        <p><strong>Population:</strong> ~2,450 residents</p>
+                        <p><strong>Elevation:</strong> 45-180m above sea level</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let currentZoom = 1;
+        const mapImage = document.getElementById('mapImage');
+        let isDragging = false;
+        let startX, startY, scrollLeft, scrollTop;
+
+        function selectHazard(element, hazardType) {
+            document.querySelectorAll('.hazard-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.2, 3);
+            mapImage.style.transform = `scale(${currentZoom})`;
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.2, 1);
+            mapImage.style.transform = `scale(${currentZoom})`;
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            mapImage.style.transform = `scale(${currentZoom})`;
+        }
+
+        function downloadMap() {
+            alert('Map export feature - Download will start shortly!');
+        }
+
+        function shareMap() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Hazard Map - Caniogan, Morong, Rizal',
+                    text: 'Check out this interactive hazard map',
+                    url: window.location.href
+                });
+            } else {
+                alert('Share link copied to clipboard!');
+            }
+        }
+
+        // Enable map dragging when zoomed
+        const mapViewer = document.getElementById('mapViewer');
+        
+        mapViewer.addEventListener('mousedown', (e) => {
+            if (currentZoom > 1) {
+                isDragging = true;
+                startX = e.pageX - mapViewer.offsetLeft;
+                startY = e.pageY - mapViewer.offsetTop;
+                scrollLeft = mapViewer.scrollLeft;
+                scrollTop = mapViewer.scrollTop;
+                mapViewer.style.cursor = 'grabbing';
+            }
+        });
+
+        mapViewer.addEventListener('mouseleave', () => {
+            isDragging = false;
+            mapViewer.style.cursor = 'default';
+        });
+
+        mapViewer.addEventListener('mouseup', () => {
+            isDragging = false;
+            mapViewer.style.cursor = currentZoom > 1 ? 'grab' : 'default';
+        });
+
+        mapViewer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - mapViewer.offsetLeft;
+            const y = e.pageY - mapViewer.offsetTop;
+            const walkX = (x - startX) * 2;
+            const walkY = (y - startY) * 2;
+            mapViewer.scrollLeft = scrollLeft - walkX;
+            mapViewer.scrollTop = scrollTop - walkY;
+        });
+    </script>
+</body>
+</html>
